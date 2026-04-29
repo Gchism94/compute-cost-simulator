@@ -34,17 +34,83 @@ TABLE_COLUMNS = [
     "metric_value",
     "budget_remaining_after",
 ]
+HIDDEN_BY_DEFAULT = {
+    "memory_gb_seconds",
+    "storage_mb",
+    "timestamp",
+    "budget_total",
+    "budget_spent_after",
+    "budget_warning",
+    "over_budget",
+}
+SPECIAL_LABELS = {
+    "runtime_seconds": "Runtime (Seconds)",
+    "total_tokens": "Total Tokens",
+    "metric_name": "Metric",
+    "metric_value": "Metric Value",
+    "cost_per_metric": "Cost per Metric",
+    "budget_remaining_after": "Remaining Budget",
+    "model_size": "Model Size",
+    "llm": "LLM",
+    "gpu": "GPU",
+    "cpu": "CPU",
+    "ai": "AI",
+    "rag": "RAG",
+    "f1": "F1",
+}
 
 
-def _currency(value: float | int | None) -> str:
+def format_label(name: str) -> str:
+    cleaned = str(name).strip()
+    lowered = cleaned.lower()
+    if lowered in SPECIAL_LABELS:
+        return SPECIAL_LABELS[lowered]
+
+    words = cleaned.replace("_", " ").split()
+    formatted_words = []
+    for word in words:
+        acronym = SPECIAL_LABELS.get(word.lower())
+        formatted_words.append(acronym if acronym else word.title())
+    return " ".join(formatted_words)
+
+
+def format_currency(value: float | int | None) -> str:
     amount = float(value or 0.0)
-    if 0 < abs(amount) < 0.01:
+    if abs(amount) < 1:
         return f"${amount:.4f}"
-    return f"${amount:.2f}"
+    return f"${amount:,.2f}"
 
 
 def _percent(value: float) -> str:
     return f"{value:.0%}"
+
+
+def _format_number(value: Any, digits: int = 2) -> str:
+    if value is None:
+        return "—"
+    return f"{float(value):,.{digits}f}"
+
+
+def _format_integer(value: Any) -> str:
+    if value is None:
+        return "—"
+    return f"{int(value):,}"
+
+
+def _format_display_value(key: str, value: Any) -> str:
+    if value is None:
+        return "—"
+    if key in {"cost", "cost_per_metric", "budget_remaining_after", "budget_total", "budget_spent_after"}:
+        return format_currency(float(value))
+    if key == "runtime_seconds":
+        return _format_number(value, digits=3)
+    if key == "metric_value":
+        return _format_number(value, digits=2)
+    if key == "total_tokens":
+        return _format_integer(value)
+    if key in {"category", "model", "model_size", "metric_name"}:
+        return format_label(str(value))
+    return str(value)
 
 
 def _load_jsonl(path: str | Path) -> list[dict[str, Any]]:
@@ -153,21 +219,61 @@ def _burn_rows(receipts: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def _chart_data(rows: list[dict[str, Any]]) -> dict[str, list[float]]:
     data = {
-        "cost_per_action": [float(row["cost"]) for row in rows],
-        "cumulative_cost": [float(row["cumulative_cost"]) for row in rows],
+        "Cost per Action": [float(row["cost"]) for row in rows],
+        "Cumulative Cost": [float(row["cumulative_cost"]) for row in rows],
     }
     remaining = [row.get("remaining_budget") for row in rows]
     if any(value is not None for value in remaining):
-        data["remaining_budget"] = [
+        data["Remaining Budget"] = [
             float(value) if value is not None else 0.0 for value in remaining
         ]
     return data
 
 
-def _clean_receipt_table(receipts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _display_receipt_table(
+    receipts: list[dict[str, Any]],
+    include_hidden: bool = False,
+) -> list[dict[str, Any]]:
     all_columns = sorted({key for receipt in receipts for key in receipt})
-    ordered_columns = TABLE_COLUMNS + [col for col in all_columns if col not in TABLE_COLUMNS]
-    return [{col: receipt.get(col) for col in ordered_columns if col in receipt} for receipt in receipts]
+    extra_columns = [
+        col
+        for col in all_columns
+        if col not in TABLE_COLUMNS and (include_hidden or col not in HIDDEN_BY_DEFAULT)
+    ]
+    ordered_columns = TABLE_COLUMNS + extra_columns
+    rows: list[dict[str, Any]] = []
+    for receipt in receipts:
+        row = {}
+        for column in ordered_columns:
+            if column in receipt:
+                row[format_label(column)] = _format_display_value(column, receipt[column])
+        rows.append(row)
+    return rows
+
+
+def _display_burn_table(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    displayed_rows: list[dict[str, Any]] = []
+    for row in rows:
+        displayed_rows.append(
+            {
+                "Action": row["action"],
+                "Task": row["task"],
+                "Category": format_label(str(row["category"])),
+                "Model": format_label(str(row["model"])),
+                "Cost": format_currency(row["cost"]),
+                "Cumulative Cost": format_currency(row["cumulative_cost"]),
+                "Remaining Budget": (
+                    format_currency(float(row["remaining_budget"]))
+                    if row.get("remaining_budget") is not None
+                    else "—"
+                ),
+            }
+        )
+    return displayed_rows
+
+
+def _format_cost_totals(costs: dict[str, float]) -> dict[str, float]:
+    return {format_label(key): value for key, value in costs.items()}
 
 
 def _show_log_help() -> None:
@@ -212,7 +318,8 @@ summary = summarize_logs(receipts)
 budget_status = _latest_budget_status(receipts)
 cost_split = _ai_vs_modeling_cost(receipts)
 burn_rows = _burn_rows(receipts)
-receipt_table = _clean_receipt_table(receipts)
+receipt_table = _display_receipt_table(receipts)
+full_receipt_table = _display_receipt_table(receipts, include_hidden=True)
 most_expensive = summary["most_expensive_action"]
 
 st.write(f"Loaded `{source_label}` with {summary['number_of_actions']} receipts.")
@@ -224,12 +331,12 @@ overview_tab, breakdown_tab, burn_tab, receipt_tab = st.tabs(
 with overview_tab:
     st.subheader("Overview")
     col1, col2, col3 = st.columns(3)
-    col1.metric("Total cost", _currency(summary["total_cost"]))
+    col1.metric("Total Cost", format_currency(summary["total_cost"]))
     col2.metric("Actions", summary["number_of_actions"])
     if budget_status:
-        col3.metric("Remaining budget", _currency(budget_status["remaining"]))
+        col3.metric("Remaining Budget", format_currency(budget_status["remaining"]))
     else:
-        col3.metric("Remaining budget", "Not logged")
+        col3.metric("Remaining Budget", "Not Logged")
 
     st.subheader("Budget Risk Meter")
     if budget_status:
@@ -237,10 +344,10 @@ with overview_tab:
         risk = _risk_label(percent_spent)
         st.progress(min(max(percent_spent, 0.0), 1.0))
         cols = st.columns(4)
-        cols[0].metric("Budget", _currency(budget_status["budget_total"]))
-        cols[1].metric("Spent", _currency(budget_status["spent"]))
-        cols[2].metric("Percent spent", _percent(percent_spent))
-        cols[3].metric("Risk level", risk)
+        cols[0].metric("Budget", format_currency(budget_status["budget_total"]))
+        cols[1].metric("Spent", format_currency(budget_status["spent"]))
+        cols[2].metric("Percent Spent", _percent(percent_spent))
+        cols[3].metric("Risk Level", risk)
         if risk == "Over budget":
             st.warning("Your workflow has exceeded the logged budget.")
         elif risk == "High":
@@ -254,10 +361,10 @@ with overview_tab:
 
     st.subheader("AI vs Modeling Cost")
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("AI / LLM usage", _currency(cost_split["ai_cost"]))
-    col2.metric("Modeling cost", _currency(cost_split["modeling_cost"]))
-    col3.metric("Other compute cost", _currency(cost_split["other_cost"]))
-    col4.metric("AI share of total", _percent(cost_split["ai_share"]))
+    col1.metric("AI / LLM Usage", format_currency(cost_split["ai_cost"]))
+    col2.metric("Modeling Cost", format_currency(cost_split["modeling_cost"]))
+    col3.metric("Other Compute Cost", format_currency(cost_split["other_cost"]))
+    col4.metric("AI Share of Total", _percent(cost_split["ai_share"]))
     if cost_split["ai_cost"] + cost_split["modeling_cost"] > cost_split["total_cost"] + FLOAT_TOLERANCE:
         st.warning("Cost split check: AI plus modeling cost exceeds total cost.")
     if cost_split["ai_cost"] > cost_split["modeling_cost"]:
@@ -267,24 +374,24 @@ with overview_tab:
 
     st.subheader("Classroom Projection")
     col1, col2, col3 = st.columns(3)
-    students = col1.number_input("Number of students", min_value=1, value=40, step=1)
-    runs_per_student = col2.number_input("Runs per student", min_value=1, value=5, step=1)
+    students = col1.number_input("Number of Students", min_value=1, value=40, step=1)
+    runs_per_student = col2.number_input("Runs per Student", min_value=1, value=5, step=1)
     projected_total = cost_split["total_cost"] * students * runs_per_student
-    col3.metric("Projected total cost", _currency(projected_total))
+    col3.metric("Projected Total Cost", format_currency(projected_total))
     st.info("Small individual costs can become large when repeated across a class.")
 
 with breakdown_tab:
     st.subheader("Cost by Category")
-    st.bar_chart(summary["cost_by_category"])
+    st.bar_chart(_format_cost_totals(summary["cost_by_category"]))
 
     st.subheader("Cost by Model")
-    st.bar_chart(summary["cost_by_model"])
+    st.bar_chart(_format_cost_totals(summary["cost_by_model"]))
 
     st.subheader("Most Expensive Action")
     if most_expensive:
         st.write(
             f"`{most_expensive.get('task', 'unknown task')}` cost "
-            f"{_currency(float(most_expensive.get('cost', 0.0)))}."
+            f"{format_currency(float(most_expensive.get('cost', 0.0)))}."
         )
     else:
         st.info("No receipts found.")
@@ -292,14 +399,18 @@ with breakdown_tab:
 with burn_tab:
     st.subheader("Budget Burn Over Time")
     st.info("This chart shows where your budget started to disappear.")
+    st.caption("X-axis: Action order. Y-axis: Simulated cost.")
     st.line_chart(_chart_data(burn_rows))
 
     st.subheader("Receipt Timeline")
-    st.dataframe(burn_rows, use_container_width=True)
+    st.dataframe(_display_burn_table(burn_rows), width="stretch")
 
 with receipt_tab:
     st.subheader("Full Receipt Table")
-    st.dataframe(receipt_table, use_container_width=True)
+    st.dataframe(receipt_table, width="stretch")
+
+    with st.expander("Show Less Common Receipt Columns"):
+        st.dataframe(full_receipt_table, width="stretch")
 
     st.subheader("Raw Most Expensive Receipt")
     if most_expensive:

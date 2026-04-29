@@ -1,0 +1,85 @@
+Read prompts/00_project_context.md first.
+
+Improve display formatting in dashboard/app.py so all user-facing text is clean, readable, and title-cased instead of snake_case or lowercase.
+
+Tasks:
+
+1. Create a helper function:
+
+def format_label(name: str) -> str
+
+Behavior:
+- replace "_" with space
+- strip whitespace
+- convert to title case
+- preserve known acronyms (optional but nice):
+    llm → LLM
+    gpu → GPU
+    cpu → CPU
+- handle special cases:
+    runtime_seconds → Runtime (Seconds)
+    total_tokens → Total Tokens
+    metric_name → Metric
+    metric_value → Metric Value
+    cost_per_metric → Cost per Metric
+    budget_remaining_after → Remaining Budget
+    model_size → Model Size
+
+2. Apply formatting to:
+
+A. Table column names
+- Before displaying receipt table, rename columns using format_label()
+
+B. Plot labels
+- Axis labels
+- Legend entries
+- Category names (modeling, llm, ai_support → Modeling, LLM, AI Support)
+
+C. Model names
+- logistic_regression → Logistic Regression
+- random_forest → Random Forest
+- neural_network → Neural Network
+- reduced_search_1 → Reduced Search 1
+
+3. Improve cost formatting
+
+Create helper:
+
+def format_currency(x):
+    return f"${x:,.4f}" if x < 1 else f"${x:,.2f}"
+
+Apply to:
+- metrics
+- tables (if feasible)
+- summaries
+
+4. Improve receipt table readability
+
+- Order columns logically:
+  Task, Category, Model, Cost, Runtime (Seconds), Total Tokens, Metric, Metric Value, Remaining Budget
+
+- Hide rarely useful columns by default (but allow expand if needed):
+  memory_gb_seconds, storage_mb, timestamp, raw budget fields
+
+5. Improve plot readability
+
+- Use formatted labels in charts
+- Ensure titles are title case:
+    "Cost by Category"
+    "Cost by Model"
+    "Budget Burn Over Time"
+
+6. Do NOT modify underlying data
+
+- Only change display layer
+- Do not change stored JSONL or core CCS package
+
+7. Keep dashboard robust
+
+- If a column is missing, skip formatting gracefully
+- Do not crash on unexpected keys
+
+Requirements:
+- Do not add heavy dependencies
+- Keep Streamlit usage simple
+- Keep student-facing clarity as priority

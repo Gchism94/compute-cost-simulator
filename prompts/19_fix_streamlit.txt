@@ -1,0 +1,33 @@
+Fix Streamlit dashboard warnings in dashboard/app.py.
+
+Tasks:
+
+1. Replace all use_container_width=True with width="stretch".
+   Replace use_container_width=False with width="content" if present.
+
+2. Fix Arrow serialization warnings in receipt tables.
+
+The error says:
+Conversion failed for column Metric Value because the column mixes numeric values and empty strings.
+
+Before passing dataframes to st.dataframe or st.table:
+- Do not fill missing numeric values with "".
+- Use None or pandas.NA for missing numeric fields.
+- Alternatively, create a display-only dataframe where formatted values are strings consistently.
+
+Preferred approach:
+- Keep raw numeric dataframe for calculations.
+- Create a display dataframe for tables.
+- Format display columns consistently:
+  - Cost as "$0.0000"
+  - Runtime (Seconds) as "0.255"
+  - Metric Value as "0.72" or "—"
+  - Total Tokens as "3,050" or "—"
+  - Remaining Budget as "$0.0116" or "—"
+
+3. Ensure receipt table still uses title-case column names.
+
+4. Keep charts numeric. Do not convert chart source data to strings.
+
+5. Do not modify core package.
+6. Keep pytest passing.
