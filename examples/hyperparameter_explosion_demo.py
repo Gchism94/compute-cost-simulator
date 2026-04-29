@@ -5,9 +5,15 @@ configuration is intentionally scaled up for teaching so a small grid search
 can visibly consume a small budget.
 """
 
+import os
 from time import sleep
 
 from ccs import Budget, compute_block
+
+
+LOG_DIR = "logs"
+LOG_PATH = os.path.join(LOG_DIR, "ccs_session.jsonl")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 
 CLASSROOM_COST_CONFIG = {
@@ -63,6 +69,7 @@ for learning_rate in learning_rates:
             metric_value=round(fake_f1, 3),
             gpu_used=True,
             config=CLASSROOM_COST_CONFIG,
+            log_path=LOG_PATH,
         ):
             sleep(seconds_per_run)
 
@@ -88,8 +95,8 @@ print(f"Remaining: {dollars(summary['remaining'])}")
 print(f"Actions tracked: {summary['number_of_actions']}")
 print(f"Best observed run: {best_run['model']} with F1={best_run['metric_value']:.3f}")
 
-print("\nWhat students should notice")
-print("---------------------------")
+print("\nWhat to notice")
+print("--------------")
 print("A grid search multiplies options: 3 learning rates x 4 depths = 12 runs.")
 print("Each run seems cheap alone, but repeated runs compound into a large total.")
 print(

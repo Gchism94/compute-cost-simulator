@@ -4,7 +4,14 @@ This example compares concise and wasteful prompting patterns. It does not call
 an actual LLM; it uses CCS token receipts to show simulated token costs.
 """
 
+import os
+
 from ccs import Budget, track_llm_call
+
+
+LOG_DIR = "logs"
+LOG_PATH = os.path.join(LOG_DIR, "ccs_session.jsonl")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 
 CLASSROOM_COST_CONFIG = {
@@ -69,6 +76,7 @@ for pattern in prompt_patterns:
         output_tokens=pattern["output_tokens"],
         budget=budget,
         config=CLASSROOM_COST_CONFIG,
+        log_path=LOG_PATH,
     )
     receipt["quality_score"] = pattern["expected_quality"]
     receipt["estimated_cost"] = round(estimated_cost, 6)
@@ -97,8 +105,8 @@ print(f"Remaining: {dollars(summary['remaining'])}")
 print(f"Actions tracked: {summary['number_of_actions']}")
 print(f"Most expensive action: {most_expensive['task']} ({dollars(most_expensive['cost'])})")
 
-print("\nWhat students should notice")
-print("---------------------------")
+print("\nWhat to notice")
+print("--------------")
 print("The repeated-context prompt uses many more tokens than the concise prompt.")
 print(
     f"In this simulation it costs {dollars(extra_cost)} more for only "

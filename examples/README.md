@@ -4,6 +4,33 @@ The examples are command-line teaching scripts. They use simulated costs and
 fake but realistic metrics so students can focus on cost-aware reasoning rather
 than setup.
 
+By default, examples append receipts to `logs/ccs_session.jsonl`. The flagship
+demo resets that shared log so you can start a clean dashboard session.
+
+## Testing The Dashboard
+
+1. Generate a shared receipt log:
+
+```bash
+python examples/flagship_budget_failure_demo.py
+python examples/intro_modeling_demo.py
+python examples/llm_token_demo.py
+python examples/rag_cost_burn_demo.py
+python examples/vibe_coding_cost_demo.py
+```
+
+2. Start the optional dashboard:
+
+```bash
+streamlit run dashboard/app.py
+```
+
+3. Load:
+
+```text
+logs/ccs_session.jsonl
+```
+
 ## Primary Overview
 
 ### `flagship_budget_failure_demo.py`

@@ -5,9 +5,15 @@ It uses CCS receipts to show why RAG costs include setup, retrieval, context,
 and answer generation across repeated questions.
 """
 
+import os
 from time import sleep
 
 from ccs import Budget, compute_block, track_llm_call
+
+
+LOG_DIR = "logs"
+LOG_PATH = os.path.join(LOG_DIR, "ccs_session.jsonl")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 
 CLASSROOM_COST_CONFIG = {
@@ -64,6 +70,7 @@ embedding_receipt = track_llm_call(
     category="rag_embedding",
     model="embedding_model",
     config=CLASSROOM_COST_CONFIG,
+    log_path=LOG_PATH,
 )
 
 with compute_block(
@@ -73,6 +80,7 @@ with compute_block(
     budget=budget,
     storage_mb=chunk_count * 0.25,
     config=CLASSROOM_COST_CONFIG,
+    log_path=LOG_PATH,
 ):
     sleep(0.03)
 
@@ -109,6 +117,7 @@ for question in questions:
         metric_name="chunks",
         metric_value=question["top_k"],
         config=CLASSROOM_COST_CONFIG,
+        log_path=LOG_PATH,
     ):
         sleep(0.01)
 
@@ -123,6 +132,7 @@ for question in questions:
         category="rag_generation",
         model="rag_chatbot",
         config=CLASSROOM_COST_CONFIG,
+        log_path=LOG_PATH,
     )
 
     question_total = retrieval_receipt["cost"] + llm_receipt["cost"]
@@ -174,8 +184,8 @@ if ai_usage_cost > non_ai_compute_cost:
 else:
     print("AI assistance was a smaller portion of your total compute cost.")
 
-print("\nWhat students should notice")
-print("---------------------------")
+print("\nWhat to notice")
+print("--------------")
 print("RAG is not free just because it uses your own documents.")
 print("More retrieved context means more input tokens in the generation step.")
 print("Chat history and repeated questions quietly increase later prompt sizes.")

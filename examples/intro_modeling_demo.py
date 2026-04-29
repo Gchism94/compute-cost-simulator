@@ -4,9 +4,15 @@ This example uses sleep() instead of real ML libraries so students can focus on
 the cost-performance tradeoff rather than setup or syntax.
 """
 
+import os
 from time import sleep
 
 from ccs import Budget, compute_block
+
+
+LOG_DIR = "logs"
+LOG_PATH = os.path.join(LOG_DIR, "ccs_session.jsonl")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 
 def dollars(value: float) -> str:
@@ -52,6 +58,7 @@ for experiment in experiments:
         metric_name="f1",
         metric_value=experiment["f1"],
         gpu_used=experiment["gpu_used"],
+        log_path=LOG_PATH,
     ):
         sleep(experiment["seconds"])
 
@@ -87,7 +94,7 @@ print(
     f"({summary['percent_spent']:.1%} of the budget used)."
 )
 
-print("\nInterpretation")
+print("\nYour takeaways")
 print("--------------")
 print(f"Cheapest model: {cheapest['model']} at {dollars(cheapest['cost'])}.")
 print(f"Best F1 score: {best_f1['model']} with F1={best_f1['metric_value']:.2f}.")

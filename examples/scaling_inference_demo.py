@@ -5,9 +5,15 @@ that looks inexpensive for a few records can become expensive for a class,
 clinic, or production-size batch.
 """
 
+import os
 from time import sleep
 
 from ccs import Budget, compute_block
+
+
+LOG_DIR = "logs"
+LOG_PATH = os.path.join(LOG_DIR, "ccs_session.jsonl")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 
 CLASSROOM_COST_CONFIG = {
@@ -53,6 +59,7 @@ for records in volumes:
         metric_value=records,
         gpu_used=True,
         config=CLASSROOM_COST_CONFIG,
+        log_path=LOG_PATH,
     ):
         sleep(records * seconds_per_prediction)
 
@@ -76,8 +83,8 @@ print(f"Remaining: {dollars(summary['remaining'])}")
 print(f"Actions tracked: {summary['number_of_actions']}")
 print(f"Most expensive action: {most_expensive['task']} ({dollars(most_expensive['cost'])})")
 
-print("\nWhat students should notice")
-print("---------------------------")
+print("\nWhat to notice")
+print("--------------")
 print("Cost scales with volume: 500 records cost much more than 10 records.")
 print("The estimated and actual costs are close because both use the same rate model.")
 print(

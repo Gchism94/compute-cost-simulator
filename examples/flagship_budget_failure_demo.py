@@ -1,15 +1,23 @@
 """Flagship demo: cost-aware computing is planning, not just accounting.
 
-A student has a small simulated budget to build a model. The script estimates
+You have a small simulated budget to build a model. The script estimates
 cost before expensive actions, chooses what to run, and ends with a defensible
 recommendation based on both F1 and cost.
 """
 
 from __future__ import annotations
 
+import os
 from time import sleep
 
 from ccs import Budget, compute_block, summarize_logs, track_llm_call
+
+
+LOG_DIR = "logs"
+LOG_PATH = os.path.join(LOG_DIR, "ccs_session.jsonl")
+os.makedirs(LOG_DIR, exist_ok=True)
+if os.path.exists(LOG_PATH):
+    os.remove(LOG_PATH)
 
 
 CLASSROOM_COST_CONFIG = {
@@ -72,6 +80,7 @@ def run_model(
         metric_value=f1,
         gpu_used=gpu_used,
         config=CLASSROOM_COST_CONFIG,
+        log_path=LOG_PATH,
     ):
         sleep(seconds)
     return budget.receipts[-1]
@@ -104,8 +113,8 @@ print("=====================================================")
 print("\nScenario")
 print("--------")
 print(
-    "A student has $0.20 of simulated compute budget to build a classifier. "
-    "They need a good model, but they also need a workflow another student can reproduce."
+    "You have $0.20 of simulated compute budget to build a classifier. "
+    "You need a good model, but you also need a workflow a classmate can reproduce."
 )
 
 print("\nStarting Budget")
@@ -211,6 +220,7 @@ assistant_receipt = track_llm_call(
     category="ai_support",
     model="rag_debug_helper",
     config=CLASSROOM_COST_CONFIG,
+    log_path=LOG_PATH,
 )
 print(
     f"AI/RAG support used {assistant_receipt['total_tokens']} tokens "
@@ -263,7 +273,7 @@ print(
     f"{dollars(final_reproduction_cost)}."
 )
 print(
-    "Feasible under the student budget: "
+    "Feasible under your budget: "
     f"{'yes' if final_reproduction_cost <= budget.total else 'no'}."
 )
 print(
@@ -288,10 +298,10 @@ if ai_usage_cost > model_training_cost:
 else:
     print("AI assistance was a smaller portion of your total compute cost.")
 
-print("\nReflection Questions")
-print("--------------------")
-print("1. Which action changed the student's plan before execution?")
+print("\nQuestions to consider")
+print("---------------------")
+print("1. Which action changed your plan before execution?")
 print("2. Was the highest-performing model worth its marginal cost?")
-print("3. How did repeated runs and AI/RAG support push the budget toward failure?")
+print("3. How did repeated runs and AI/RAG support push your budget toward failure?")
 print("4. What would you cut first if you had to make this workflow reproducible?")
 print("5. How would your decision change if the whole class repeated this workflow?")

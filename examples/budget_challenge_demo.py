@@ -5,9 +5,15 @@ performance and cost. No real model training happens here; sleep() stands in
 for compute time.
 """
 
+import os
 from time import sleep
 
 from ccs import Budget, compute_block, track_llm_call
+
+
+LOG_DIR = "logs"
+LOG_PATH = os.path.join(LOG_DIR, "ccs_session.jsonl")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 
 def dollars(value: float) -> str:
@@ -65,6 +71,7 @@ for approach in modeling_approaches:
         metric_name="f1",
         metric_value=approach["f1"],
         gpu_used=approach["gpu_used"],
+        log_path=LOG_PATH,
     ):
         sleep(approach["seconds"])
 
@@ -77,6 +84,7 @@ llm_receipt = track_llm_call(
     input_tokens=1000,
     output_tokens=250,
     budget=budget,
+    log_path=LOG_PATH,
 )
 llm_receipt["quality_score"] = 0.82
 
@@ -102,8 +110,8 @@ model_receipts = [r for r in budget.receipts if r["category"] == "modeling"]
 best_f1 = max(model_receipts, key=lambda r: r["metric_value"])
 best_value = min(model_receipts, key=lambda r: r["cost_per_metric"])
 
-print("\nWhat students should notice")
-print("---------------------------")
+print("\nWhat to notice")
+print("--------------")
 print(
     f"The top model is {best_f1['model']} with f1={best_f1['metric_value']:.2f}, "
     f"but it costs {dollars(best_f1['cost'])}."

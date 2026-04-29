@@ -1,0 +1,47 @@
+Read prompts/00_project_context.md first.
+
+Update example script output so all discussion, reflection, and takeaway language is student-facing.
+
+Focus on:
+- examples/flagship_budget_failure_demo.py
+- examples/intro_modeling_demo.py
+- examples/llm_token_demo.py
+- examples/budget_challenge_demo.py
+- examples/hyperparameter_explosion_demo.py
+- examples/scaling_inference_demo.py
+- examples/token_burn_demo.py
+- examples/rag_cost_burn_demo.py
+- examples/vibe_coding_cost_demo.py
+
+Tasks:
+1. Replace instructor-facing headings such as:
+   - "What students should notice"
+   with student-facing headings such as:
+   - "What to notice"
+   - "Your takeaways"
+   - "Questions to consider"
+
+2. Rewrite any reflection questions that refer to “the student” into direct student-facing language.
+
+Examples:
+- Change: "Which action changed the student's plan before execution?"
+- To: "Which action changed your plan before execution?"
+
+- Change: "How did repeated runs and AI/RAG support push the budget toward failure?"
+- To: "How did repeated runs and AI/RAG support push your budget toward failure?"
+
+3. Keep the tone direct, clear, and appropriate for students.
+
+4. Do not change the core package API.
+
+5. Do not change cost calculations unless necessary.
+
+6. Do not add dependencies.
+
+7. Keep pytest passing.
+
+After changes, run:
+python -m pytest
+python examples/flagship_budget_failure_demo.py
+python examples/llm_token_demo.py
+python examples/budget_challenge_demo.py

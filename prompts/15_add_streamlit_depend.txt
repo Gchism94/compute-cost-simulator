@@ -1,0 +1,11 @@
+Update dependency management to treat Streamlit as optional.
+
+Tasks:
+1. Ensure requirements.txt has no dependencies except a comment.
+2. Add streamlit>=1.30 to requirements-dev.txt.
+3. Update README.md:
+   - Add an "Optional: Dashboard" section.
+   - Show how to install streamlit manually.
+   - Show how to run dashboard/app.py.
+4. Do not modify core package code.
+5. Keep pytest passing.

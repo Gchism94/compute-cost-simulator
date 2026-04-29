@@ -15,5 +15,6 @@ compute_cost_simulator.egg-info/requires.txt
 compute_cost_simulator.egg-info/top_level.txt
 tests/test_budget.py
 tests/test_cost_model.py
+tests/test_llm.py
 tests/test_reports.py
 tests/test_tracker.py

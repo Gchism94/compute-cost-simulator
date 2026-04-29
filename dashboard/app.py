@@ -21,6 +21,9 @@ except ModuleNotFoundError as exc:  # pragma: no cover - only reached without op
 from ccs import summarize_logs
 
 
+DEFAULT_LOG_PATH = "logs/ccs_session.jsonl"
+
+
 def _load_jsonl(path: str | Path) -> list[dict[str, Any]]:
     receipts: list[dict[str, Any]] = []
     with Path(path).open("r", encoding="utf-8") as f:
@@ -49,6 +52,55 @@ def _remaining_budget(receipts: list[dict[str, Any]]) -> float | None:
     return None
 
 
+def _looks_like_ai_receipt(receipt: dict[str, Any]) -> bool:
+    category = str(receipt.get("category", "")).lower()
+    model = str(receipt.get("model", "")).lower()
+    model_size = str(receipt.get("model_size", "")).lower()
+    task = str(receipt.get("task", "")).lower()
+    ai_markers = ("ai", "llm", "rag", "chat", "assistant", "embedding")
+    return (
+        category == "llm"
+        or any(marker in category for marker in ai_markers)
+        or any(marker in model for marker in ai_markers)
+        or any(marker in model_size for marker in ai_markers)
+        or any(marker in task for marker in ai_markers)
+    )
+
+
+def _ai_vs_modeling_cost(receipts: list[dict[str, Any]]) -> dict[str, float]:
+    total_cost = sum(float(receipt.get("cost", 0.0)) for receipt in receipts)
+    ai_cost = sum(
+        float(receipt.get("cost", 0.0))
+        for receipt in receipts
+        if _looks_like_ai_receipt(receipt)
+    )
+    modeling_cost = sum(
+        float(receipt.get("cost", 0.0))
+        for receipt in receipts
+        if receipt.get("category") == "modeling"
+    )
+    other_compute_cost = max(total_cost - ai_cost - modeling_cost, 0.0)
+    ai_share = ai_cost / total_cost if total_cost else 0.0
+    return {
+        "ai_cost": ai_cost,
+        "modeling_cost": modeling_cost,
+        "other_compute_cost": other_compute_cost,
+        "ai_share": ai_share,
+    }
+
+
+def _show_log_help() -> None:
+    st.info(
+        "No receipts loaded yet. Generate a dashboard log by running:\n\n"
+        "```bash\n"
+        "python examples/flagship_budget_failure_demo.py\n"
+        "python examples/intro_modeling_demo.py\n"
+        "python examples/llm_token_demo.py\n"
+        "```\n\n"
+        f"Then load `{DEFAULT_LOG_PATH}` here."
+    )
+
+
 st.set_page_config(page_title="Compute Cost Simulator", layout="wide")
 st.title("Compute Cost Simulator Dashboard")
 st.caption("All costs shown here are simulated pedagogical estimates, not real billing.")
@@ -56,7 +108,7 @@ st.caption("All costs shown here are simulated pedagogical estimates, not real b
 with st.sidebar:
     st.header("Receipt Log")
     uploaded_file = st.file_uploader("Upload JSONL receipt log", type=["jsonl"])
-    path_text = st.text_input("Or enter a JSONL path", value="")
+    path_text = st.text_input("Or enter a JSONL path", value=DEFAULT_LOG_PATH)
 
 receipts: list[dict[str, Any]] = []
 source_label = ""
@@ -75,10 +127,11 @@ try:
         summary = summarize_logs([])
 except (OSError, json.JSONDecodeError, ValueError) as exc:
     st.error(f"Could not load receipt log: {exc}")
+    _show_log_help()
     st.stop()
 
 if not receipts:
-    st.info("Upload a JSONL receipt log or enter a path to get started.")
+    _show_log_help()
     st.stop()
 
 st.subheader(f"Summary for {source_label}")
@@ -88,6 +141,18 @@ col1, col2, col3 = st.columns(3)
 col1.metric("Total cost", f"${summary['total_cost']:.4f}")
 col2.metric("Actions", summary["number_of_actions"])
 col3.metric("Remaining budget", "Not logged" if remaining is None else f"${remaining:.4f}")
+
+st.subheader("AI vs Modeling Cost")
+cost_split = _ai_vs_modeling_cost(receipts)
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("AI / LLM usage", f"${cost_split['ai_cost']:.2f}")
+col2.metric("Modeling cost", f"${cost_split['modeling_cost']:.2f}")
+col3.metric("Other compute cost", f"${cost_split['other_compute_cost']:.2f}")
+col4.metric("AI share of total", f"{cost_split['ai_share']:.0%}")
+if cost_split["ai_cost"] > cost_split["modeling_cost"]:
+    st.write("You spent more on AI assistance than on model training.")
+else:
+    st.write("AI assistance was a smaller portion of your total compute cost.")
 
 col1, col2 = st.columns(2)
 with col1:

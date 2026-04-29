@@ -1,11 +1,18 @@
 """LLM token demo: compare simulated prompt costs.
 
 The quality scores are fake but realistic enough for a classroom discussion.
-Students should notice that larger models cost more, and the extra quality may
+You should notice that larger models cost more, and the extra quality may
 or may not justify the extra simulated spend.
 """
 
+import os
+
 from ccs import Budget, track_llm_call
+
+
+LOG_DIR = "logs"
+LOG_PATH = os.path.join(LOG_DIR, "ccs_session.jsonl")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 
 def dollars(value: float) -> str:
@@ -58,6 +65,7 @@ for call in calls:
         input_tokens=call["input_tokens"],
         output_tokens=call["output_tokens"],
         budget=budget,
+        log_path=LOG_PATH,
     )
     receipt["quality_score"] = call["quality"]
     receipt["cost_per_quality"] = round(receipt["cost"] / call["quality"], 6)
@@ -76,8 +84,8 @@ for receipt in budget.receipts:
 best_quality = max(budget.receipts, key=lambda r: r["quality_score"])
 best_value = min(budget.receipts, key=lambda r: r["cost_per_quality"])
 
-print("\nWhat students should notice")
-print("---------------------------")
+print("\nWhat to notice")
+print("--------------")
 print(
     f"Best quality: {best_quality['model_size']} "
     f"with score={best_quality['quality_score']:.2f}."

@@ -7,9 +7,15 @@ repeated vague prompts can compound simulated token costs.
 
 from __future__ import annotations
 
+import os
 from time import sleep
 
 from ccs import Budget, track_llm_call
+
+
+LOG_DIR = "logs"
+LOG_PATH = os.path.join(LOG_DIR, "ccs_session.jsonl")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 
 CLASSROOM_COST_CONFIG = {
@@ -44,6 +50,7 @@ def run_chat_turns(label: str, budget: Budget, turns: list[dict[str, int | str]]
             category="ai_coding",
             model="coding_assistant",
             config=CLASSROOM_COST_CONFIG,
+            log_path=LOG_PATH,
         )
         print(
             f"{turn_number:>4} "
@@ -164,8 +171,8 @@ if ai_usage_cost > model_training_cost:
 else:
     print("AI assistance was a smaller portion of your total compute cost.")
 
-print("\nWhat students should notice")
-print("---------------------------")
+print("\nWhat to notice")
+print("--------------")
 print("Each chat turn has a cost, even when the assistant gives a bad answer.")
 print("Pasting large files or tracebacks increases input tokens quickly.")
 print("Repeated vague prompts compound because every retry sends more context.")
