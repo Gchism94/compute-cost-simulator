@@ -147,6 +147,23 @@ print(f"Simulated savings from planning: {dollars(savings)}")
 print(f"20 similar sessions unstructured: {dollars(monthly_unstructured)}")
 print(f"20 similar sessions planned: {dollars(monthly_planned)}")
 
+ai_usage_cost = unstructured_summary["spent"]
+model_training_cost = 0.0
+ai_calls = unstructured_summary["number_of_actions"]
+total_tokens = sum(receipt["total_tokens"] for receipt in unstructured_budget.receipts)
+
+print("\nAI Usage Summary")
+print("----------------")
+print(f"- AI usage cost: {dollars(ai_usage_cost)}")
+print(f"- Model training cost: {dollars(model_training_cost)}")
+print(f"- Number of AI calls: {ai_calls}")
+print(f"- Total tokens used: {total_tokens:,}")
+print("\nObservation:")
+if ai_usage_cost > model_training_cost:
+    print("You spent more on AI assistance than on the model itself.")
+else:
+    print("AI assistance was a smaller portion of your total compute cost.")
+
 print("\nWhat students should notice")
 print("---------------------------")
 print("Each chat turn has a cost, even when the assistant gives a bad answer.")

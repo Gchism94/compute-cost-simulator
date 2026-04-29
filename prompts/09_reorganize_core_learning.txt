@@ -1,0 +1,45 @@
+Read prompts/00_project_context.md first.
+
+Reorganize the repository documentation to reflect that the flagship demo is the core learning arc and the other examples are modular curriculum pieces.
+
+Do not change the core package API.
+
+Make the following changes:
+
+1. Update README.md:
+- Present examples/flagship_budget_failure_demo.py as the primary demo.
+- Explain that other examples are deeper curriculum modules.
+- Add a brief “Learning pathway” section.
+- Keep installation and quickstart concise.
+- Clearly state that all costs are simulated.
+
+2. Add examples/README.md:
+- List each example script.
+- For each script include:
+  - teaching purpose
+  - core concept
+  - suggested module
+  - command to run it
+
+3. Add curriculum/README.md:
+- Describe the seven-module curriculum:
+  1. Compute is not free
+  2. Cost-performance tradeoffs
+  3. Token economics
+  4. Repeated experimentation and hyperparameter costs
+  5. RAG and vibe-coding cost loops
+  6. Scaling and deployment
+  7. Budget-constrained final challenge
+- Explain that the flagship demo can be used as the overview lesson.
+
+4. Add teaching/ materials:
+- teaching/assignment_template.md
+- teaching/reflection_questions.md
+- teaching/rubric.md
+- teaching/discussion_prompts.md
+
+5. Add ROADMAP.md:
+- Separate current prototype, curriculum expansion, and future software features.
+
+Keep pytest passing.
+Do not add external dependencies.

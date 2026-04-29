@@ -1,0 +1,88 @@
+Read prompts/00_project_context.md first.
+
+Create one flagship teaching example that demonstrates the full Compute Cost Simulator learning arc.
+
+Create:
+
+examples/flagship_budget_failure_demo.py
+
+Purpose:
+Show students that cost-aware computing is not just about tracking cost after the fact. It is about deciding what to run, estimating cost before execution, managing a limited budget, and justifying tradeoffs.
+
+The example should demonstrate:
+1. Cheap baseline
+2. Incremental improvement
+3. Expensive model
+4. Hyperparameter explosion
+5. AI/RAG or vibe-coding support cost
+6. Budget warning
+7. Budget failure or near-failure
+8. Final decision/reflection
+
+Use only the existing CCS public API unless absolutely necessary:
+- Budget
+- compute_block
+- track_llm_call
+- summarize_logs
+
+Do not modify core package unless necessary.
+
+Implementation requirements:
+- No external dependencies.
+- Use time.sleep() to simulate compute.
+- Use a small budget, e.g. $0.15 or $0.20, so constraints are visible.
+- Print readable student-facing output.
+- Do not print raw dictionaries.
+- Include clear sections:
+  - Scenario
+  - Starting Budget
+  - Step 1: Cheap Baseline
+  - Step 2: Better Model
+  - Step 3: Expensive Model
+  - Step 4: Hyperparameter Search Decision
+  - Step 5: AI Assistant / RAG Support Cost
+  - Budget Status
+  - Final Recommendation
+  - Reflection Questions
+- Include pre-run estimates using simple hard-coded estimates if the current API does not support estimation directly.
+- Before expensive steps, print:
+  - estimated cost
+  - remaining budget
+  - percent of remaining budget consumed
+  - decision warning
+- Simulate at least one action that would exceed or nearly exceed the remaining budget.
+- If the core Budget class does not block execution, simulate the decision not to run by printing:
+  “Decision: do not run this full search because it would exceed the budget.”
+- Then show a cheaper alternative, such as reducing grid search from 20 runs to 3 runs.
+- Include cost-performance comparison:
+  - F1
+  - cost
+  - cost_per_f1
+  - marginal gain from previous model
+  - marginal cost from previous model
+- Include classroom-scale projection:
+  - e.g. “If 40 students each ran the expensive version 5 times…”
+- Include reproducibility framing:
+  - estimated cost to reproduce the final workflow
+  - whether the workflow is feasible under the student budget
+
+Suggested narrative:
+A student has a $0.20 budget to build a model.
+They try:
+1. Logistic regression: cheap, okay F1
+2. Random forest: modest cost, better F1
+3. Neural network: higher cost, slightly better F1
+4. Full hyperparameter search: would exceed budget, so they reduce it
+5. AI assistant debugging/RAG help: useful, but consumes token budget
+
+The final recommendation should probably choose random forest or reduced search, not the most expensive model, because the marginal gain is small relative to cost.
+
+Output should make the learning moment obvious:
+- The highest-performing model is not automatically the best choice.
+- Repeated runs and AI assistant loops can consume budget quickly.
+- Pre-run estimation changes student behavior.
+- Cost-aware work is about planning, not just accounting.
+
+Add this script to README.md under examples if appropriate.
+
+Keep pytest passing.

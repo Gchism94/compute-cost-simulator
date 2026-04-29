@@ -271,6 +271,23 @@ print(
     f"{dollars(classroom_projection)}."
 )
 
+ai_receipts = [receipt for receipt in budget.receipts if receipt["category"] == "ai_support"]
+model_training_cost = sum(receipt["cost"] for receipt in model_receipts)
+ai_usage_cost = sum(receipt["cost"] for receipt in ai_receipts)
+total_tokens = sum(receipt.get("total_tokens", 0) for receipt in ai_receipts)
+
+print("\nAI Usage Summary")
+print("----------------")
+print(f"- AI usage cost: {dollars(ai_usage_cost)}")
+print(f"- Model training cost: {dollars(model_training_cost)}")
+print(f"- Number of AI calls: {len(ai_receipts)}")
+print(f"- Total tokens used: {total_tokens:,}")
+print("\nObservation:")
+if ai_usage_cost > model_training_cost:
+    print("You spent more on AI assistance than on the model itself.")
+else:
+    print("AI assistance was a smaller portion of your total compute cost.")
+
 print("\nReflection Questions")
 print("--------------------")
 print("1. Which action changed the student's plan before execution?")

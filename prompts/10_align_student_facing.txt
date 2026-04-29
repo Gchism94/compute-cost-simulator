@@ -1,0 +1,69 @@
+Read prompts/00_project_context.md first.
+
+Update teaching materials to be student-facing and include clear guidance on the use of generative AI.
+
+Tasks:
+
+1. Update teaching/reflection_questions.md:
+- Rewrite questions in a direct student-facing tone.
+- Organize into sections:
+  - What happened
+  - Tradeoffs
+  - Decision-making
+  - AI usage
+  - Efficiency
+  - Big picture
+- Keep questions concise and readable.
+
+2. Create teaching/genai_guidelines.md:
+- Allow AI use but define boundaries.
+- Require transparency.
+- Emphasize that AI usage contributes to cost.
+- Focus on learning and decision-making.
+
+3. Update teaching/assignment_template.md:
+- Add an "AI Usage Statement" section.
+- Add a "Manual Requirement" section.
+- Keep instructions clear and student-friendly.
+
+4. Update teaching/rubric.md:
+- Add a criterion for reasoning and justification.
+- Emphasize independent thinking over tool usage.
+
+5. Add a high-impact AI cost comparison to examples:
+
+Update the following example scripts where appropriate:
+- examples/vibe_coding_cost_demo.py
+- examples/rag_cost_burn_demo.py
+- examples/flagship_budget_failure_demo.py (if applicable)
+
+Add a section at the end of each script:
+
+AI Usage Summary
+----------------
+- AI usage cost: $X.XX
+- Model training cost: $X.XX (or total non-AI compute cost)
+
+Observation:
+If AI usage cost > model cost, print:
+"You spent more on AI assistance than on the model itself."
+
+Otherwise print:
+"AI assistance was a smaller portion of your total compute cost."
+
+Also include:
+- number of AI calls
+- total tokens used (if available)
+
+Purpose:
+Make students aware that AI-assisted workflows can be a major contributor to total cost, not just model training.
+
+Requirements:
+- Use existing CCS API only (track_llm_call, Budget, etc.).
+- Do not add external dependencies.
+- Keep output student-friendly.
+- Avoid printing raw dictionaries.
+- Keep pytest passing.
+
+Do not modify core package unless necessary.
+Focus on clarity and teaching impact.

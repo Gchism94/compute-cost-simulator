@@ -1,5 +1,8 @@
 # Compute Cost Simulator
 
+![Zero dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
+![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)
+
 Compute Cost Simulator (CCS) is a lightweight Python package for teaching
 **cost-aware computing** in notebooks and scripts. It helps students see how
 CPU time, GPU time, memory, storage, and LLM token usage can shape technical
@@ -7,6 +10,13 @@ decisions.
 
 All costs in CCS are **simulated pedagogical estimates**. They are not real
 billing data, provider prices, or cloud account charges.
+
+## Why This Matters
+
+CCS has no required external dependencies and does not need cloud setup,
+credentials, dashboards, or billing APIs. Students can run the examples with a
+standard Python installation and focus on the lesson: estimating costs, making
+tradeoffs, and explaining decisions rather than fighting environment setup.
 
 ## Primary Demo
 
@@ -37,16 +47,18 @@ See [examples/README.md](examples/README.md) and
 
 ## Installation
 
-From the repository root:
+Core install:
 
 ```bash
 pip install -e .
 ```
 
-For development and tests:
+No additional packages are required to run the examples.
+
+Development install:
 
 ```bash
-pip install -e ".[dev]"
+pip install -r requirements-dev.txt
 pytest
 ```
 
@@ -89,6 +101,13 @@ print(budget.summary())
 - **LLM token costs:** `track_llm_call()` shows how input and output tokens
   affect simulated cost.
 - **Summaries:** `summarize_logs()` groups receipts by category and model.
+
+## Design Philosophy
+
+CCS is intentionally small. The package favors readable code, plain Python data
+structures, and command-line examples over infrastructure. The goal is
+pedagogical clarity: students should spend their attention on deciding what is
+worth running, not on installing a heavy stack.
 
 ## Optional Dashboard
 

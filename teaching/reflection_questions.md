@@ -1,35 +1,47 @@
 # Reflection Questions
 
-Use these questions after running the flagship demo, an individual module, or a
-student project.
+Use these questions after running a demo or completing your own cost-aware
+computing workflow.
 
-## Planning
+## What Happened
 
-1. What did you estimate before running anything expensive?
-2. Which estimate changed your decision?
-3. What did you decide not to run, and why?
+1. What did you run or simulate?
+2. What was your starting budget?
+3. Which action cost the most?
+4. Did you stay within budget?
 
-## Cost-Performance
+## Tradeoffs
 
-1. Which approach had the best performance?
-2. Which approach had the best cost-performance tradeoff?
-3. Was the highest-performing approach worth its marginal cost?
-4. What metric did you use, and what did it leave out?
+1. Which approach performed best?
+2. Which approach was cheapest?
+3. Which approach gave the best value for its cost?
+4. Was the best-performing approach worth the extra cost?
 
-## Tokens And AI Assistance
+## Decision-Making
 
-1. Which prompts or chat turns used the most tokens?
-2. Did long context improve the result enough to justify the cost?
-3. How could you reduce token use without reducing quality too much?
+1. What did you estimate before running it?
+2. Did an estimate change your plan?
+3. What did you choose not to run?
+4. What would you run next if you had more budget?
 
-## Repeated Runs And Scale
+## AI Usage
 
-1. Which repeated action compounded cost the fastest?
-2. What would the workflow cost if 40 students repeated it?
-3. What would the workflow cost if it ran weekly for a month?
+1. Did you use an AI assistant, chatbot, RAG system, or coding tool?
+2. How many AI calls did you make?
+3. Which AI call used the most tokens?
+4. Did AI support cost more than model training or compute?
+5. How did AI help your work, and what did you still need to decide yourself?
 
-## Reproducibility
+## Efficiency
 
-1. Could another student reproduce your final workflow under the same budget?
-2. What would you remove or simplify to make reproduction cheaper?
-3. What should be documented so the cost estimate is understandable?
+1. Where did you waste tokens, runtime, or repeated runs?
+2. How could you reduce cost without losing much quality?
+3. Could a smaller prompt, smaller model, or smaller search answer the same question?
+4. Could another student reproduce your workflow under the same budget?
+
+## Big Picture
+
+1. What does this example teach about hidden computing costs?
+2. What would happen if 40 students repeated your workflow?
+3. How would costs change if the workflow ran every week?
+4. What is your final recommendation, and why?
