@@ -26,4 +26,15 @@ with compute_block(
 ):
     sleep(0.75)
 
+with compute_block(
+    task="train neural network",
+    category="modeling",
+    model="neural_network",
+    budget=budget,
+    metric_name="f1",
+    metric_value=0.71,
+    gpu_used=True,
+):
+    sleep(1.00)
+
 print(budget.summary())

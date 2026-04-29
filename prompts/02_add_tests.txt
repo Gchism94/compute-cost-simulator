@@ -1,0 +1,20 @@
+Read prompts/00_project_context.md first.
+
+Add or improve tests for the existing package.
+
+Test:
+- Budget initialization
+- Budget.add_receipt
+- Budget.remaining
+- Budget.is_over_budget
+- CPU runtime cost calculation
+- GPU runtime cost calculation
+- LLM token cost calculation
+- compute_block produces a receipt
+- compute_block adds receipt to budget
+- track_llm_call adds receipt to budget
+- summarize_logs groups cost by category and model
+
+Keep tests simple and readable.
+Do not introduce unnecessary dependencies.
+Run pytest and fix failures.

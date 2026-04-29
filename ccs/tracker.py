@@ -5,32 +5,19 @@ from __future__ import annotations
 import json
 import time
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
 from .budget import Budget
-from .cost_model import CostModel
+from .cost_model import CostModel, estimate_runtime_cost
 
 
-def _write_receipt(receipt: dict[str, Any], log_dir: str | Path = "ccs_logs") -> None:
-    """Append receipts to JSONL and CSV files."""
-    path = Path(log_dir)
-    path.mkdir(parents=True, exist_ok=True)
-
-    jsonl_path = path / "receipts.jsonl"
-    with jsonl_path.open("a", encoding="utf-8") as f:
+def _append_jsonl(receipt: dict[str, Any], log_path: str | Path) -> None:
+    path = Path(log_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
         f.write(json.dumps(receipt) + "\n")
-
-    csv_path = path / "receipts.csv"
-    fields = sorted(receipt.keys())
-    write_header = not csv_path.exists()
-    import csv
-
-    with csv_path.open("a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fields)
-        if write_header:
-            writer.writeheader()
-        writer.writerow(receipt)
 
 
 @contextmanager
@@ -39,17 +26,19 @@ def compute_block(
     category: str = "general",
     model: str | None = None,
     budget: Budget | None = None,
-    gpu_used: bool = False,
-    memory_gb: float | None = None,
-    storage_mb: float | None = None,
     metric_name: str | None = None,
     metric_value: float | None = None,
+    gpu_used: bool = False,
+    memory_gb_seconds: float = 0,
+    storage_mb: float = 0,
+    log_path: str | Path | None = None,
+    config: dict[str, Any] | None = None,
     cost_model: CostModel | None = None,
-    log: bool = True,
-    log_dir: str | Path = "ccs_logs",
+    memory_gb: float | None = None,
+    log: bool | None = None,
+    log_dir: str | Path | None = None,
 ) -> Iterator[dict[str, Any]]:
-    """Track a block of code and produce a simulated computational receipt."""
-    cm = cost_model or CostModel.from_default_config()
+    """Track a block of code and create a simulated compute receipt."""
     receipt: dict[str, Any] = {
         "task": task,
         "category": category,
@@ -59,20 +48,48 @@ def compute_block(
         "metric_value": metric_value,
     }
     start = time.perf_counter()
-    yield receipt
-    runtime = time.perf_counter() - start
-    cost = cm.compute_runtime_cost(runtime, gpu_used, memory_gb, storage_mb)
-    receipt.update(
-        {
-            "runtime_seconds": round(runtime, 6),
-            "memory_gb": memory_gb,
-            "storage_mb": storage_mb,
-            "cost": cost,
-        }
-    )
-    if metric_name and metric_value not in (None, 0):
-        receipt["cost_per_metric"] = round(cost / float(metric_value), 6)
-    if budget is not None:
-        budget.add_receipt(receipt)
-    if log:
-        _write_receipt(receipt, log_dir=log_dir)
+    try:
+        yield receipt
+    finally:
+        runtime_seconds = time.perf_counter() - start
+        effective_memory_gb_seconds = memory_gb_seconds
+        if memory_gb is not None and memory_gb_seconds == 0:
+            effective_memory_gb_seconds = runtime_seconds * memory_gb
+
+        if cost_model is not None:
+            cost = cost_model.compute_runtime_cost(
+                runtime_seconds=runtime_seconds,
+                gpu_used=gpu_used,
+                memory_gb=memory_gb,
+                storage_mb=storage_mb,
+            )
+        else:
+            cost = estimate_runtime_cost(
+                runtime_seconds=runtime_seconds,
+                gpu_used=gpu_used,
+                memory_gb_seconds=effective_memory_gb_seconds,
+                storage_mb=storage_mb,
+                config=config,
+            )
+
+        receipt.update(
+            {
+                "runtime_seconds": round(runtime_seconds, 6),
+                "memory_gb_seconds": round(effective_memory_gb_seconds, 6),
+                "storage_mb": storage_mb,
+                "cost": cost,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        )
+        if metric_name and metric_value not in (None, 0):
+            receipt["cost_per_metric"] = round(cost / float(metric_value), 6)
+        else:
+            receipt["cost_per_metric"] = None
+
+        if budget is not None:
+            budget.add_receipt(receipt)
+
+        if log_path is not None:
+            _append_jsonl(receipt, log_path)
+        elif log and log_dir is not None:
+            _append_jsonl(receipt, Path(log_dir) / "receipts.jsonl")

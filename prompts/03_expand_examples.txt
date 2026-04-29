@@ -1,0 +1,18 @@
+Read prompts/00_project_context.md first.
+
+Improve the examples so they are useful for students.
+
+Create or update:
+- examples/intro_modeling_demo.py
+- examples/llm_token_demo.py
+- examples/budget_challenge_demo.py
+
+Requirements:
+- No external ML dependencies.
+- Use time.sleep() to simulate compute.
+- Include fake but realistic performance metrics.
+- Show budget summaries.
+- Show cost-performance tradeoffs.
+- Include comments explaining what students should notice.
+
+Do not add notebooks yet.

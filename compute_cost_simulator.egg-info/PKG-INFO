@@ -1,3 +1,17 @@
+Metadata-Version: 2.4
+Name: compute-cost-simulator
+Version: 0.1.0
+Summary: A pedagogical compute cost simulator for notebooks and data science education.
+Author: Greg Chism
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: ruff>=0.5.0; extra == "dev"
+Dynamic: license-file
+
 # Compute Cost Simulator
 
 A lightweight Python package for teaching **cost-aware computing** in notebooks

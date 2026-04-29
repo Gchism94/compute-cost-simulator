@@ -1,0 +1,16 @@
+Read prompts/00_project_context.md first.
+
+Review the repository for clarity, consistency, and student usability.
+
+Tasks:
+- Simplify overly complex code.
+- Improve docstrings.
+- Check naming consistency.
+- Ensure examples still run.
+- Ensure pytest passes.
+- Identify missing tests.
+- Update README if behavior changed.
+
+Do not add major new features.
+Do not add cloud billing.
+Do not add dashboards unless already present.

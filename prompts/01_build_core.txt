@@ -1,0 +1,24 @@
+Read prompts/00_project_context.md first.
+
+Implement the first working prototype of the Compute Cost Simulator.
+
+Focus on:
+- ccs/cost_model.py
+- ccs/budget.py
+- ccs/tracker.py
+- ccs/llm.py
+- ccs/reports.py
+- ccs/__init__.py
+
+Requirements:
+- Budget tracks receipts, total spent, remaining budget, and summary.
+- compute_block is a context manager that records runtime and simulated cost.
+- track_llm_call estimates token costs.
+- summarize_logs summarizes receipts.
+- Use only the Python standard library.
+- Keep all receipts as plain dictionaries.
+- Make examples runnable.
+- Make pytest pass.
+
+Do not add a dashboard.
+Do not add real cloud billing.

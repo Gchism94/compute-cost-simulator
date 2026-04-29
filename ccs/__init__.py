@@ -1,8 +1,16 @@
 """Compute Cost Simulator public API."""
 
 from .budget import Budget
-from .cost_model import CostModel
+from .cost_model import CostModel, load_cost_config
 from .llm import track_llm_call
+from .reports import summarize_logs
 from .tracker import compute_block
 
-__all__ = ["Budget", "CostModel", "compute_block", "track_llm_call"]
+__all__ = [
+    "Budget",
+    "CostModel",
+    "compute_block",
+    "track_llm_call",
+    "load_cost_config",
+    "summarize_logs",
+]

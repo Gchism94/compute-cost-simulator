@@ -1,0 +1,20 @@
+Read prompts/00_project_context.md first.
+
+Add an optional lightweight dashboard prototype.
+
+Use Streamlit only if necessary and keep it optional.
+
+Goal:
+Create a simple dashboard that can load a JSONL receipt log and display:
+- total cost
+- remaining budget if available
+- cost by category
+- cost by model
+- most expensive action
+- receipt table
+
+Requirements:
+- Do not make Streamlit a required dependency for core package use.
+- Put dashboard code in dashboard/app.py.
+- Update README with optional dashboard instructions.
+- Do not change the core API.
