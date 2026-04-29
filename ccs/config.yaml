@@ -1,0 +1,16 @@
+costs:
+  cpu_second: 0.002
+  gpu_second: 0.025
+  memory_gb_second: 0.0004
+  storage_mb: 0.00001
+
+llm_models:
+  small:
+    input_token: 0.000001
+    output_token: 0.000002
+  medium:
+    input_token: 0.00001
+    output_token: 0.00002
+  large:
+    input_token: 0.00005
+    output_token: 0.0001

@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "compute-cost-simulator"
+version = "0.1.0"
+description = "A pedagogical compute cost simulator for notebooks and data science education."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Greg Chism" }]
+license = { text = "MIT" }
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ccs*"]
+
+[tool.setuptools.package-data]
+ccs = ["config.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
