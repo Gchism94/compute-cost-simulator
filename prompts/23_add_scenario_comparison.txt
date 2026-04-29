@@ -1,0 +1,14 @@
+Update dashboard/app.py.
+
+Add a "Scenario Comparison" tab.
+
+If receipts include a scenario field, show:
+- total cost by scenario
+- AI cost by scenario
+- modeling cost by scenario
+- action count
+- classroom projection
+- repeated project projection
+
+If no scenario field exists, show:
+"Run python examples/realistic_usage_scenarios_demo.py to generate scenario logs."

@@ -90,6 +90,25 @@ track_llm_call(
 print(budget.summary())
 ```
 
+## Pre-Run Estimation
+
+Use estimation helpers before expensive actions so you can decide what is worth
+running.
+
+```python
+from ccs import Budget, can_afford, estimate_action_cost, estimate_batch_cost
+
+budget = Budget(total=1.00)
+
+one_run = estimate_action_cost(runtime_seconds=30, gpu_used=True)
+full_search = estimate_batch_cost(one_run, n_actions=10)
+
+if can_afford(budget, full_search):
+    print("Run the full search.")
+else:
+    print("Try fewer runs first.")
+```
+
 ## Core Concepts
 
 - **Computational receipts:** plain dictionaries that record task, category,
@@ -132,10 +151,12 @@ To test the dashboard end to end:
 python examples/flagship_budget_failure_demo.py
 python examples/intro_modeling_demo.py
 python examples/llm_token_demo.py
+python examples/realistic_usage_scenarios_demo.py
 streamlit run dashboard/app.py
 ```
 
-Then load `logs/ccs_session.jsonl`.
+Then load `logs/ccs_session.jsonl` for the main receipt log, or
+`logs/realistic_usage_scenarios.jsonl` for the scenario comparison tab.
 
 ## Teaching Materials
 

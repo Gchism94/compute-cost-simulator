@@ -1,0 +1,38 @@
+Read prompts/00_project_context.md first.
+
+Add lightweight pre-run estimation helpers to the core package.
+
+Implement in ccs/cost_model.py or a new ccs/estimation.py module:
+
+1. estimate_action_cost(...)
+Suggested signature:
+estimate_action_cost(
+    runtime_seconds=0,
+    gpu_used=False,
+    memory_gb_seconds=0,
+    storage_mb=0,
+    model_size=None,
+    input_tokens=0,
+    output_tokens=0,
+    config=None,
+)
+
+Behavior:
+- If model_size is provided, include estimated LLM token cost.
+- Include runtime cost using existing estimate_runtime_cost().
+- Return a float estimated cost.
+
+2. estimate_batch_cost(cost_per_action, n_actions)
+- Return cost_per_action * n_actions.
+
+3. can_afford(budget, estimated_cost)
+- Return True if estimated_cost <= budget.remaining().
+
+Export from ccs/__init__.py.
+
+Add tests for all three helpers.
+
+Update README.md with a short pre-run estimation example.
+
+Do not break existing API.
+Keep pytest passing.

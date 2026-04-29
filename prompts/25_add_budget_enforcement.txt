@@ -1,0 +1,40 @@
+Read prompts/00_project_context.md first.
+
+Add optional hard budget enforcement.
+
+Tasks:
+
+1. Create a BudgetExceededError exception.
+Put it in ccs/budget.py or ccs/exceptions.py.
+
+2. Extend Budget:
+Budget(total, warn_at=0.8, enforce=False)
+
+Default enforce=False to preserve current behavior.
+
+3. Add a method:
+budget.check_affordable(estimated_cost)
+
+Behavior:
+- If enforce=False, return True.
+- If enforce=True and estimated_cost > remaining budget, raise BudgetExceededError with a clear message:
+  "Budget exceeded: estimated cost $X.XX exceeds remaining budget $Y.YY."
+
+4. Update compute_block and track_llm_call carefully.
+- Do not require estimates for normal use.
+- If an estimated_cost argument is provided and budget.enforce=True, check before running.
+- If no estimated_cost is provided, preserve current behavior.
+
+5. Add optional estimated_cost parameter to:
+- compute_block(...)
+- track_llm_call(...)
+
+6. Add tests:
+- enforce=False does not raise
+- enforce=True raises when estimated cost exceeds remaining budget
+- enforce=True allows affordable actions
+
+7. Update README with a short example.
+
+Keep existing examples working.
+Keep pytest passing.

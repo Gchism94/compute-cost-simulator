@@ -276,6 +276,45 @@ def _format_cost_totals(costs: dict[str, float]) -> dict[str, float]:
     return {format_label(key): value for key, value in costs.items()}
 
 
+def _scenario_rows(receipts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    scenarios = sorted({str(receipt["scenario"]) for receipt in receipts if receipt.get("scenario")})
+    rows: list[dict[str, Any]] = []
+    for scenario in scenarios:
+        scenario_receipts = [receipt for receipt in receipts if receipt.get("scenario") == scenario]
+        split = _ai_vs_modeling_cost(scenario_receipts)
+        rows.append(
+            {
+                "Scenario": scenario,
+                "Total Cost": split["total_cost"],
+                "AI / LLM Cost": split["ai_cost"],
+                "Modeling Cost": split["modeling_cost"],
+                "Action Count": len(scenario_receipts),
+                "AI Share": split["ai_share"],
+                "Projected Classroom Cost": split["total_cost"] * 40,
+                "Projected 5x Project Cost": split["total_cost"] * 40 * 5,
+            }
+        )
+    return rows
+
+
+def _display_scenario_rows(rows: list[dict[str, Any]]) -> list[dict[str, str]]:
+    displayed_rows: list[dict[str, str]] = []
+    for row in rows:
+        displayed_rows.append(
+            {
+                "Scenario": row["Scenario"],
+                "Total Cost": format_currency(row["Total Cost"]),
+                "AI / LLM Cost": format_currency(row["AI / LLM Cost"]),
+                "Modeling Cost": format_currency(row["Modeling Cost"]),
+                "Action Count": _format_integer(row["Action Count"]),
+                "AI Share": _percent(row["AI Share"]),
+                "Projected Classroom Cost": format_currency(row["Projected Classroom Cost"]),
+                "Projected 5x Project Cost": format_currency(row["Projected 5x Project Cost"]),
+            }
+        )
+    return displayed_rows
+
+
 def _show_log_help() -> None:
     st.info(
         "No receipts loaded yet. To generate a dashboard log:\n\n"
@@ -321,11 +360,12 @@ burn_rows = _burn_rows(receipts)
 receipt_table = _display_receipt_table(receipts)
 full_receipt_table = _display_receipt_table(receipts, include_hidden=True)
 most_expensive = summary["most_expensive_action"]
+scenario_rows = _scenario_rows(receipts)
 
 st.write(f"Loaded `{source_label}` with {summary['number_of_actions']} receipts.")
 
-overview_tab, breakdown_tab, burn_tab, receipt_tab = st.tabs(
-    ["Overview", "Cost Breakdown", "Budget Burn", "Receipt Log"]
+overview_tab, breakdown_tab, burn_tab, scenario_tab, receipt_tab = st.tabs(
+    ["Overview", "Cost Breakdown", "Budget Burn", "Scenario Comparison", "Receipt Log"]
 )
 
 with overview_tab:
@@ -404,6 +444,60 @@ with burn_tab:
 
     st.subheader("Receipt Timeline")
     st.dataframe(_display_burn_table(burn_rows), width="stretch")
+
+with scenario_tab:
+    st.subheader("Scenario Comparison")
+    if not scenario_rows:
+        st.info(
+            "Scenario comparison requires receipts with a Scenario field. "
+            "Run `python examples/realistic_usage_scenarios_demo.py`, then load "
+            "`logs/realistic_usage_scenarios.jsonl`."
+        )
+    else:
+        st.write(
+            "Use this tab to compare structured classroom work with more open-ended "
+            "project workflows."
+        )
+        st.dataframe(_display_scenario_rows(scenario_rows), width="stretch")
+
+        st.subheader("Total Cost by Scenario")
+        st.bar_chart({row["Scenario"]: row["Total Cost"] for row in scenario_rows})
+
+        st.subheader("AI / LLM Cost by Scenario")
+        st.bar_chart({row["Scenario"]: row["AI / LLM Cost"] for row in scenario_rows})
+
+        st.subheader("Modeling Cost by Scenario")
+        st.bar_chart({row["Scenario"]: row["Modeling Cost"] for row in scenario_rows})
+
+        st.subheader("Classroom vs Outside-Class Projection")
+        col1, col2, col3, col4 = st.columns(4)
+        students = col1.number_input("Students", min_value=1, value=40, step=1)
+        repetitions = col2.number_input("Repetitions per Student", min_value=1, value=5, step=1)
+        in_class_sessions = col3.number_input("In-Class Sessions per Term", min_value=1, value=6, step=1)
+        project_iterations = col4.number_input("Project Iterations per Student", min_value=1, value=10, step=1)
+
+        scenario_costs = {row["Scenario"]: float(row["Total Cost"]) for row in scenario_rows}
+        structured_cost = scenario_costs.get("Structured In-Class Lab", 0.0)
+        project_cost = scenario_costs.get("Student Project Workflow", 0.0)
+        uninhibited_cost = scenario_costs.get("Uninhibited AI-Assisted Workflow", project_cost)
+
+        structured_total = structured_cost * students * in_class_sessions
+        project_total = project_cost * students * project_iterations
+        uninhibited_total = uninhibited_cost * students * repetitions
+        difference = uninhibited_total - structured_total
+
+        metric_cols = st.columns(4)
+        metric_cols[0].metric("Structured Classroom Total", format_currency(structured_total))
+        metric_cols[1].metric("Project-Work Total", format_currency(project_total))
+        metric_cols[2].metric("Uninhibited Workflow Total", format_currency(uninhibited_total))
+        metric_cols[3].metric("Difference", format_currency(difference))
+
+        st.info(
+            "Classroom labs usually keep costs low by limiting model complexity, "
+            "tokens, and repetitions. Project work can become more expensive "
+            "because you try more models, ask for more AI help, paste longer "
+            "context, and rerun workflows many times."
+        )
 
 with receipt_tab:
     st.subheader("Full Receipt Table")

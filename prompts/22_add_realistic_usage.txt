@@ -1,0 +1,61 @@
+Read prompts/00_project_context.md first.
+
+Add a realistic scenario comparison example.
+
+Create:
+
+examples/realistic_usage_scenarios_demo.py
+
+Purpose:
+Show how costs differ between structured classroom use, student project work, and uninhibited AI-assisted workflows.
+
+Simulate three scenarios:
+
+1. Structured In-Class Lab
+- simple models
+- limited runs
+- small AI/token use
+- low cost
+
+2. Student Project Workflow
+- more model experimentation
+- neural network or transformer-like simulation
+- repeated debugging/refactor AI calls
+- small RAG session
+
+3. Uninhibited AI-Assisted Workflow
+- many chatbot turns
+- verbose prompts
+- pasted tracebacks
+- repeated retries
+- larger model size
+- RAG context
+
+For each scenario, print:
+- total cost
+- action count
+- AI/LLM cost
+- modeling cost
+- percent of cost from AI
+- projected cost for 40 students
+- projected cost if each student repeats the workflow 5 times
+
+Use existing CCS API only:
+- Budget
+- compute_block
+- track_llm_call
+- summarize_logs
+
+Use time.sleep() to simulate compute.
+Write receipts to:
+
+logs/realistic_usage_scenarios.jsonl
+
+Add a scenario field to each receipt if possible:
+- "Structured In-Class Lab"
+- "Student Project Workflow"
+- "Uninhibited AI-Assisted Workflow"
+
+Keep language student-facing.
+Do not add dependencies.
+Keep pytest passing.

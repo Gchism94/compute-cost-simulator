@@ -17,6 +17,7 @@ python examples/intro_modeling_demo.py
 python examples/llm_token_demo.py
 python examples/rag_cost_burn_demo.py
 python examples/vibe_coding_cost_demo.py
+python examples/realistic_usage_scenarios_demo.py
 ```
 
 2. Start the optional dashboard:
@@ -29,6 +30,12 @@ streamlit run dashboard/app.py
 
 ```text
 logs/ccs_session.jsonl
+```
+
+For scenario comparison, load:
+
+```text
+logs/realistic_usage_scenarios.jsonl
 ```
 
 ## Primary Overview
@@ -133,4 +140,15 @@ python examples/scaling_inference_demo.py
 
 ```bash
 python examples/budget_challenge_demo.py
+```
+
+### `realistic_usage_scenarios_demo.py`
+
+- Teaching purpose: compare structured classroom use with open-ended student project habits.
+- Core concept: repeated AI calls, RAG context, and larger models make independent projects costlier than constrained labs.
+- Suggested module: classroom vs outside-class cost planning.
+- Command:
+
+```bash
+python examples/realistic_usage_scenarios_demo.py
 ```

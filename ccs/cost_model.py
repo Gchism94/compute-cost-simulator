@@ -90,6 +90,49 @@ def estimate_llm_cost(
     return round(cost, 6)
 
 
+def estimate_action_cost(
+    runtime_seconds: float = 0,
+    gpu_used: bool = False,
+    memory_gb_seconds: float = 0,
+    storage_mb: float = 0,
+    model_size: str | None = None,
+    input_tokens: int = 0,
+    output_tokens: int = 0,
+    config: dict[str, Any] | None = None,
+) -> float:
+    """Estimate the total simulated cost of one planned action.
+
+    This combines runtime-style cost with optional LLM token cost so students
+    can reason about an action before deciding whether to run it.
+    """
+    runtime_cost = estimate_runtime_cost(
+        runtime_seconds=runtime_seconds,
+        gpu_used=gpu_used,
+        memory_gb_seconds=memory_gb_seconds,
+        storage_mb=storage_mb,
+        config=config,
+    )
+    llm_cost = 0.0
+    if model_size is not None:
+        llm_cost = estimate_llm_cost(
+            model_size=model_size,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            config=config,
+        )
+    return round(runtime_cost + llm_cost, 6)
+
+
+def estimate_batch_cost(cost_per_action: float, n_actions: int) -> float:
+    """Estimate simulated cost for repeating the same action many times."""
+    return round(cost_per_action * n_actions, 6)
+
+
+def can_afford(budget: Any, estimated_cost: float) -> bool:
+    """Return whether a budget has enough remaining simulated funds."""
+    return estimated_cost <= budget.remaining()
+
+
 class CostModel:
     """Small compatibility wrapper around the module-level cost functions.
 

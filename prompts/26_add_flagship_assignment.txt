@@ -1,0 +1,67 @@
+Read prompts/00_project_context.md first.
+
+Create a polished teaching assignment.
+
+Create:
+
+teaching/cost_aware_model_selection_assignment.md
+
+Include:
+
+1. Title:
+Cost-Aware Model Selection Challenge
+
+2. Overview:
+Students will compare computational approaches under a simulated compute budget and justify their final choice using performance, cost, scalability, and reproducibility.
+
+3. Learning Goals:
+- Explain that compute has cost.
+- Compare performance and cost.
+- Identify when expensive models are not justified.
+- Estimate classroom/project-scale cost.
+- Reflect on AI tool usage.
+
+4. Setup:
+- pip install -e .
+- run examples/flagship_budget_failure_demo.py
+- optionally run examples/realistic_usage_scenarios_demo.py
+
+5. Student Task:
+- Use a fixed simulated budget.
+- Run or simulate at least three approaches.
+- Include at least one cheap baseline.
+- Include at least one more expensive approach.
+- Track all actions with CCS.
+
+6. GenAI Usage Statement:
+Require students to report:
+- tools used
+- approximate number of interactions
+- what they used AI for
+- one suggestion they accepted
+- one suggestion they rejected
+
+7. Manual Requirement:
+At least one model or workflow decision must be made without AI-generated code.
+
+8. Reflection Questions:
+Use direct student-facing language.
+
+9. Submission Checklist:
+- receipt log
+- short written justification
+- budget summary
+- final model choice
+- AI usage statement
+
+10. Rubric:
+Include clear point categories for:
+- cost tracking
+- model comparison
+- budget reasoning
+- scalability/reproducibility
+- AI transparency
+- clarity
+
+Keep language student-facing.
+Do not modify code.

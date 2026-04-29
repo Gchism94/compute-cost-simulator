@@ -1,0 +1,150 @@
+Read prompts/00_project_context.md first.
+
+Add more realistic usage scenarios showing how simulated compute costs differ between structured classroom use and more uninhibited student project use.
+
+Goal:
+Help students and instructors see that:
+- in-class labs often use small/simple models and constrained examples
+- independent projects often use larger models, more iterations, more AI help, and RAG workflows
+- small per-action costs can creep quickly when repeated outside class
+- classroom-scale costs are different from individual project costs
+
+Tasks:
+
+1. Add a new example script:
+
+examples/realistic_usage_scenarios_demo.py
+
+This script should simulate and compare at least three scenarios:
+
+A. Structured In-Class Lab
+- simple models
+- limited runs
+- small LLM/token use
+- constrained budget
+- example actions:
+  - logistic regression
+  - random forest
+  - small prompt for explanation/debugging
+
+B. Student Project Workflow
+- more sophisticated models
+- more experimentation
+- more AI assistant usage
+- example actions:
+  - random forest or XGBoost-like simulated model
+  - neural network
+  - transformer/large model simulation
+  - several debugging/refactor AI calls
+  - small RAG retrieval session
+
+C. Uninhibited AI-Assisted Workflow
+- repeated chatbot use
+- verbose prompts
+- pasted tracebacks
+- RAG context
+- multiple retries
+- more expensive model size
+- many token-heavy calls
+
+For each scenario, show:
+- total cost
+- action count
+- AI/LLM cost
+- modeling cost
+- percentage of cost from AI
+- projected classroom cost for 40 students
+- projected repeated-project cost if each student repeats the workflow 5 times
+
+Use existing CCS API:
+- Budget
+- compute_block
+- track_llm_call
+- summarize_logs
+
+Use time.sleep() to simulate compute.
+Do not add external dependencies.
+
+2. Make the output student-facing.
+
+Use headings like:
+- Scenario A: Structured In-Class Lab
+- Scenario B: Student Project Workflow
+- Scenario C: Uninhibited AI-Assisted Workflow
+- What to notice
+- Questions to consider
+
+Avoid instructor-facing phrasing such as:
+- What students should notice
+
+3. Make the cost contrast obvious.
+
+The in-class lab should be cheap.
+The student project should be noticeably more expensive.
+The uninhibited workflow should show costs creeping quickly due to repeated AI calls and larger models.
+
+4. Log all actions.
+
+Use:
+logs/ccs_session.jsonl
+
+Do not reset the shared log unless this script is being run standalone.
+If useful, create a separate log:
+logs/realistic_usage_scenarios.jsonl
+
+Prefer writing to the separate scenario log so the dashboard can load it directly.
+
+5. Add dashboard support for scenario comparison.
+
+Update dashboard/app.py to include a new tab:
+
+Tab: Scenario Simulator or Scenario Comparison
+
+If loaded receipts include a field like "scenario", group by scenario.
+If no scenario field exists, the tab should explain that scenario comparison requires running:
+python examples/realistic_usage_scenarios_demo.py
+
+If needed, add scenario metadata to receipts in the new example by attaching:
+receipt["scenario"] = "Structured In-Class Lab"
+after each compute_block/track_llm_call receipt, or by using task/category names if the API does not support metadata.
+
+Dashboard scenario comparison should show:
+- total cost by scenario
+- AI/LLM cost by scenario
+- modeling cost by scenario
+- action count by scenario
+- projected classroom cost by scenario
+- projected 5x project cost by scenario
+
+6. Add classroom vs outside-class projection controls.
+
+In dashboard:
+- number of students, default 40
+- repetitions per student, default 5
+- in-class sessions per term, default 6
+- project iterations per student, default 10
+
+Display:
+- estimated structured classroom total
+- estimated project-work total
+- difference between constrained and unconstrained workflows
+
+7. Add a student-facing interpretation block.
+
+Example language:
+"Classroom labs usually keep costs low by limiting model complexity, tokens, and repetitions. Project work can become more expensive because students try more models, ask for more AI help, paste longer context, and rerun workflows many times."
+
+8. Update README.md and examples/README.md.
+
+Add:
+- how to run the realistic scenarios demo
+- how to load its log into the dashboard
+- why this scenario comparison matters
+
+Requirements:
+- Do not add heavy dependencies.
+- Do not modify stored receipt format globally unless necessary.
+- Do not break existing examples.
+- Keep pytest passing.
+- Keep all user-facing labels in title case.
+- Avoid snake_case in dashboard display labels.
