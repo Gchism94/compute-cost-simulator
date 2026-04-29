@@ -9,6 +9,7 @@ from typing import Any
 
 
 def _load_receipts(receipts: list[dict[str, Any]] | str | Path) -> list[dict[str, Any]]:
+    """Return receipts from an in-memory list or JSONL path."""
     if isinstance(receipts, list):
         return receipts
 
@@ -21,7 +22,11 @@ def _load_receipts(receipts: list[dict[str, Any]] | str | Path) -> list[dict[str
 
 
 def summarize_logs(receipts: list[dict[str, Any]] | str | Path) -> dict[str, Any]:
-    """Summarize receipts from a list or JSONL file path."""
+    """Summarize simulated cost receipts.
+
+    ``receipts`` may be either a list of receipt dictionaries or a path to a
+    JSONL file created with ``log_path``.
+    """
     loaded = _load_receipts(receipts)
     total_cost = round(sum(float(r.get("cost", 0.0)) for r in loaded), 6)
     most_expensive = None

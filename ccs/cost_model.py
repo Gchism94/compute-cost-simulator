@@ -54,7 +54,12 @@ def estimate_runtime_cost(
     storage_mb: float = 0,
     config: dict[str, Any] | None = None,
 ) -> float:
-    """Estimate a simulated cost for a timed compute action."""
+    """Estimate simulated compute cost from resource-use proxies.
+
+    ``runtime_seconds`` is always charged at the CPU rate. If ``gpu_used`` is
+    true, the same runtime is also charged at the GPU rate. Memory and storage
+    are optional teaching proxies, not measurements from the operating system.
+    """
     rates = (config or load_cost_config())["runtime"]
     cpu_cost = runtime_seconds * rates.get("cpu_second", 0.0)
     gpu_cost = runtime_seconds * rates.get("gpu_second", 0.0) if gpu_used else 0.0
@@ -69,7 +74,7 @@ def estimate_llm_cost(
     output_tokens: int,
     config: dict[str, Any] | None = None,
 ) -> float:
-    """Estimate a simulated LLM cost from token counts."""
+    """Estimate simulated LLM cost from input and output token counts."""
     llm_rates = (config or load_cost_config())["llm"]
     if model_size not in llm_rates:
         available = ", ".join(sorted(llm_rates))
@@ -86,7 +91,12 @@ def estimate_llm_cost(
 
 
 class CostModel:
-    """Compatibility wrapper around the module-level cost functions."""
+    """Small compatibility wrapper around the module-level cost functions.
+
+    New examples should prefer ``estimate_runtime_cost()``,
+    ``estimate_llm_cost()``, and ``load_cost_config()``. This class remains so
+    older notebooks that created a ``CostModel`` still work.
+    """
 
     def __init__(
         self,

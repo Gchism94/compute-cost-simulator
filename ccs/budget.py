@@ -11,7 +11,11 @@ from typing import Any
 
 @dataclass
 class Budget:
-    """Track simulated spending against a fixed teaching budget."""
+    """Track simulated spending against a fixed teaching budget.
+
+    Receipts are stored as plain dictionaries so students can inspect and edit
+    them easily in a notebook.
+    """
 
     total: float
     spent: float = 0.0
@@ -19,7 +23,7 @@ class Budget:
     warn_at: float = 0.8
 
     def add_receipt(self, receipt: dict[str, Any]) -> dict[str, Any]:
-        """Add a plain-dictionary receipt and update budget metadata."""
+        """Add a receipt and annotate it with budget status fields."""
         cost = float(receipt.get("cost", 0.0))
         self.spent = round(self.spent + cost, 6)
         receipt["budget_total"] = self.total
@@ -69,7 +73,7 @@ class Budget:
             json.dump(data, f, indent=2)
 
     def to_csv(self, path: str | Path) -> None:
-        """Write receipts to a CSV file."""
+        """Write receipts to a CSV file for spreadsheet inspection."""
         fieldnames = sorted({key for receipt in self.receipts for key in receipt})
         with Path(path).open("w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)

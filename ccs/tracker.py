@@ -38,7 +38,12 @@ def compute_block(
     log: bool | None = None,
     log_dir: str | Path | None = None,
 ) -> Iterator[dict[str, Any]]:
-    """Track a block of code and create a simulated compute receipt."""
+    """Track a block of code and create a simulated compute receipt.
+
+    Pass ``budget`` to store the receipt on a ``Budget``. Pass ``log_path`` to
+    append the receipt to a JSONL file that can later be summarized or loaded
+    in the optional dashboard.
+    """
     receipt: dict[str, Any] = {
         "task": task,
         "category": category,

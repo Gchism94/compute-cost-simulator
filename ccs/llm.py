@@ -29,7 +29,12 @@ def track_llm_call(
     log_path: str | Path | None = None,
     config: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Create a simulated receipt for an LLM call."""
+    """Create a simulated receipt for an LLM call.
+
+    ``model_size`` selects one of the configured teaching-rate tiers. ``model``
+    can be used as a display name when a course wants labels such as
+    ``draft_model`` or ``review_model`` instead of ``small``/``medium``/``large``.
+    """
     cost = estimate_llm_cost(model_size, input_tokens, output_tokens, config=config)
     receipt = {
         "task": task,
