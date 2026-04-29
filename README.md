@@ -126,6 +126,17 @@ Run the dashboard:
 streamlit run dashboard/app.py
 ```
 
+To test the dashboard end to end:
+
+```bash
+python examples/flagship_budget_failure_demo.py
+python examples/intro_modeling_demo.py
+python examples/llm_token_demo.py
+streamlit run dashboard/app.py
+```
+
+Then load `logs/ccs_session.jsonl`.
+
 ## Teaching Materials
 
 - [Assignment template](teaching/assignment_template.md)

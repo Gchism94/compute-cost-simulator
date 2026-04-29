@@ -1,0 +1,40 @@
+Fix AI vs Modeling cost calculation in dashboard/app.py.
+
+Tasks:
+
+1. Correct cost aggregation:
+- total_cost = sum of all receipt["cost"]
+
+- ai_cost:
+  sum cost where:
+    category == "llm"
+    OR category == "ai_support"
+
+- modeling_cost:
+  sum cost where:
+    category == "modeling"
+
+- other_cost:
+  total_cost - ai_cost - modeling_cost
+
+2. Ensure no double-counting.
+
+3. Recalculate:
+- ai_share = ai_cost / total_cost
+
+4. Fix observation logic:
+
+If ai_cost > modeling_cost:
+  "You spent more on AI assistance than on model training."
+Else:
+  "AI assistance was a smaller portion of your total compute cost."
+
+5. Format values consistently:
+- currency to 2 decimal places
+- percentages as whole numbers or 1 decimal
+
+6. Add debug check (optional but useful):
+- if ai_cost + modeling_cost > total_cost:
+    display warning in dashboard
+
+Do not modify core package.

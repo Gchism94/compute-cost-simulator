@@ -1,0 +1,160 @@
+Read prompts/00_project_context.md first.
+
+Upgrade dashboard/app.py from a basic receipt viewer into a polished teaching dashboard for the Compute Cost Simulator.
+
+Goals:
+1. Fix AI vs modeling cost calculations.
+2. Improve visual design and layout.
+3. Add budget depletion / cost-over-time visualization.
+4. Make the dashboard more student-facing and instructor-demo ready.
+
+Tasks:
+
+1. Fix AI vs Modeling Cost logic
+
+Current dashboard output appears inconsistent: AI / LLM usage and modeling cost can be double-counted or conflict with total cost. Fix this.
+
+Use:
+- total_cost = sum(receipt["cost"] for all receipts)
+- ai_cost = sum cost where category is "llm" or "ai_support"
+- modeling_cost = sum cost where category is "modeling"
+- other_cost = total_cost - ai_cost - modeling_cost
+
+Do not double-count.
+If other_cost is near zero but slightly negative due to floating point, clamp to 0.
+
+Observation logic:
+- If ai_cost > modeling_cost:
+  "You spent more on AI assistance than on model training."
+- Else:
+  "AI assistance was a smaller portion of your total compute cost."
+
+2. Add Cost Over Time section
+
+Create a section titled:
+
+Budget Burn Over Time
+
+Show:
+- each action in order
+- cost per action
+- cumulative cost
+- remaining budget if budget_total is available
+
+Use Streamlit's built-in charting if possible.
+Avoid adding heavy dependencies.
+
+Include a short student-facing interpretation:
+"This chart shows where your budget started to disappear."
+
+3. Add Budget Risk Meter
+
+If budget_total exists, show:
+- percent spent
+- remaining budget
+- risk level:
+  - Low: <50%
+  - Medium: 50–80%
+  - High: 80–100%
+  - Over budget: >100%
+
+Use st.progress() for budget spent.
+
+4. Improve visual layout
+
+Use:
+- st.set_page_config(page_title="Compute Cost Simulator", layout="wide")
+- clear page title
+- short subtitle:
+  "Simulated compute costs for teaching cost-aware AI and data science."
+
+Organize dashboard into tabs:
+
+Tab 1: Overview
+- total cost
+- actions
+- remaining budget
+- budget risk meter
+- AI vs modeling cost
+
+Tab 2: Cost Breakdown
+- cost by category
+- cost by model
+- most expensive action
+
+Tab 3: Budget Burn
+- cost-over-time / cumulative cost chart
+- receipt timeline table
+
+Tab 4: Receipt Log
+- full receipt table
+- raw most expensive receipt as expandable JSON
+
+5. Improve styling
+
+Use Streamlit-friendly polish:
+- st.metric for headline numbers
+- st.columns for metric cards
+- st.info / st.warning / st.success for observations
+- st.expander for raw JSON
+- format currency consistently to 2 or 4 decimals depending on scale
+- avoid dumping large raw dictionaries directly on the page
+
+6. Improve receipt table
+
+Show a clean table with selected columns first:
+- task
+- category
+- model
+- cost
+- runtime_seconds
+- total_tokens
+- metric_name
+- metric_value
+- budget_remaining_after
+
+If columns are missing, handle gracefully.
+
+7. Add classroom-scale projection
+
+Add a small section:
+
+Classroom Projection
+
+Controls:
+- number of students, default 40
+- runs per student, default 5
+
+Show:
+- projected total cost = total_cost * students * runs_per_student
+
+Student-facing interpretation:
+"Small individual costs can become large when repeated across a class."
+
+8. Robustness
+
+If no file is loaded:
+- show clear instructions:
+  1. Run examples/flagship_budget_failure_demo.py
+  2. Run additional examples if desired
+  3. Load logs/ccs_session.jsonl
+
+If JSONL parsing fails:
+- show a helpful error with the bad line number if possible.
+
+9. Documentation
+
+Update README.md or examples/README.md with:
+- how to generate logs
+- how to run dashboard
+- note that Streamlit is optional
+- command:
+  streamlit run dashboard/app.py
+
+Requirements:
+- Do not modify the core CCS public API unless absolutely necessary.
+- Do not add Streamlit to requirements.txt.
+- Streamlit may remain in requirements-dev.txt or optional dashboard instructions.
+- Do not add heavy dependencies like pandas unless already used in dashboard.
+- Keep pytest passing.
+- Keep all language student-facing.

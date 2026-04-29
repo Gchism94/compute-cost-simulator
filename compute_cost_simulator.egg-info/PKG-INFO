@@ -125,13 +125,20 @@ structures, and command-line examples over infrastructure. The goal is
 pedagogical clarity: students should spend their attention on deciding what is
 worth running, not on installing a heavy stack.
 
-## Optional Dashboard
+## Optional: Dashboard
 
 CCS includes a lightweight Streamlit dashboard prototype for JSONL receipt logs.
 Streamlit is optional and is not required for core package use.
 
+Install Streamlit only if you want to use the dashboard:
+
 ```bash
-pip install -e ".[dashboard]"
+pip install "streamlit>=1.30"
+```
+
+Run the dashboard:
+
+```bash
 streamlit run dashboard/app.py
 ```
 
