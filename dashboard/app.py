@@ -449,9 +449,7 @@ with scenario_tab:
     st.subheader("Scenario Comparison")
     if not scenario_rows:
         st.info(
-            "Scenario comparison requires receipts with a Scenario field. "
-            "Run `python examples/realistic_usage_scenarios_demo.py`, then load "
-            "`logs/realistic_usage_scenarios.jsonl`."
+            "Run `python examples/realistic_usage_scenarios_demo.py` to generate scenario logs."
         )
     else:
         st.write(

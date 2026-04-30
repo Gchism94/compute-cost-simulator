@@ -1,6 +1,6 @@
 """Compute Cost Simulator public API."""
 
-from .budget import Budget
+from .budget import Budget, BudgetExceededError
 from .cost_model import (
     CostModel,
     can_afford,
@@ -14,6 +14,7 @@ from .tracker import compute_block
 
 __all__ = [
     "Budget",
+    "BudgetExceededError",
     "CostModel",
     "compute_block",
     "track_llm_call",

@@ -31,6 +31,7 @@ def compute_block(
     gpu_used: bool = False,
     memory_gb_seconds: float = 0,
     storage_mb: float = 0,
+    estimated_cost: float | None = None,
     log_path: str | Path | None = None,
     config: dict[str, Any] | None = None,
     cost_model: CostModel | None = None,
@@ -44,6 +45,9 @@ def compute_block(
     append the receipt to a JSONL file that can later be summarized or loaded
     in the optional dashboard.
     """
+    if budget is not None and estimated_cost is not None:
+        budget.check_affordable(estimated_cost)
+
     receipt: dict[str, Any] = {
         "task": task,
         "category": category,

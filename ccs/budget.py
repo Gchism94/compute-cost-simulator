@@ -9,6 +9,10 @@ from pathlib import Path
 from typing import Any
 
 
+class BudgetExceededError(RuntimeError):
+    """Raised when an enforced budget cannot afford an estimated action."""
+
+
 @dataclass
 class Budget:
     """Track simulated spending against a fixed teaching budget.
@@ -21,6 +25,7 @@ class Budget:
     spent: float = 0.0
     receipts: list[dict[str, Any]] = field(default_factory=list)
     warn_at: float = 0.8
+    enforce: bool = False
 
     def add_receipt(self, receipt: dict[str, Any]) -> dict[str, Any]:
         """Add a receipt and annotate it with budget status fields."""
@@ -33,6 +38,24 @@ class Budget:
         receipt["over_budget"] = self.is_over_budget()
         self.receipts.append(receipt)
         return receipt
+
+    def check_affordable(self, estimated_cost: float) -> bool:
+        """Check whether an estimated action fits within the remaining budget.
+
+        Enforcement is opt-in. When ``enforce`` is false, this method always
+        returns ``True`` so students can keep using budgets as flexible trackers.
+        """
+        if not self.enforce:
+            return True
+
+        remaining = self.remaining()
+        if float(estimated_cost) > remaining:
+            raise BudgetExceededError(
+                "Budget exceeded: estimated cost "
+                f"${float(estimated_cost):.2f} exceeds remaining budget "
+                f"${remaining:.2f}."
+            )
+        return True
 
     def remaining(self) -> float:
         """Return the simulated budget remaining."""

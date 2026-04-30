@@ -109,6 +109,31 @@ else:
     print("Try fewer runs first.")
 ```
 
+## Optional Budget Enforcement
+
+Budgets normally track spending without blocking your code. If you want a hard
+stop before an estimated action runs, turn on enforcement and pass
+`estimated_cost`.
+
+```python
+from ccs import Budget, BudgetExceededError, compute_block
+
+budget = Budget(total=0.20, enforce=True)
+
+try:
+    with compute_block(
+        task="full grid search",
+        category="modeling",
+        model="random_forest",
+        budget=budget,
+        estimated_cost=0.35,
+    ):
+        run_grid_search()
+except BudgetExceededError as error:
+    print(error)
+    print("Choose a smaller experiment before spending the budget.")
+```
+
 ## Core Concepts
 
 - **Computational receipts:** plain dictionaries that record task, category,

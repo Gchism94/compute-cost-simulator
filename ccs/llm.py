@@ -28,6 +28,7 @@ def track_llm_call(
     model: str | None = None,
     log_path: str | Path | None = None,
     config: dict[str, Any] | None = None,
+    estimated_cost: float | None = None,
 ) -> dict[str, Any]:
     """Create a simulated receipt for an LLM call.
 
@@ -35,6 +36,9 @@ def track_llm_call(
     can be used as a display name when a course wants labels such as
     ``draft_model`` or ``review_model`` instead of ``small``/``medium``/``large``.
     """
+    if budget is not None and estimated_cost is not None:
+        budget.check_affordable(estimated_cost)
+
     cost = estimate_llm_cost(model_size, input_tokens, output_tokens, config=config)
     receipt = {
         "task": task,
